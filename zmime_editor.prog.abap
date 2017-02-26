@@ -235,6 +235,7 @@ FORM init_2000.
     PERFORM get_content CHANGING lv_content.
     go_editor->set_textstream( lv_content ).
     go_editor->set_focus( go_editor ).
+    gv_init = abap_true.
   ENDIF.
 
 ENDFORM.
