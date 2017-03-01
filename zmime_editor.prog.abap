@@ -189,6 +189,8 @@ FORM save.
 
   MESSAGE 'Saved'(003) TYPE 'S'.
 
+  go_editor->set_textmodified_status( 0 ).
+
 ENDFORM.
 
 FORM back.
