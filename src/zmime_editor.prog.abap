@@ -29,11 +29,17 @@ REPORT zmime_editor.
 DATA: gv_ok_code   LIKE sy-ucomm,
       gv_init      TYPE abap_bool,
       go_container TYPE REF TO cl_gui_custom_container,
+      go_splitter  TYPE REF TO cl_gui_easy_splitter_container,
+      go_tree      TYPE REF TO cl_gui_simple_tree,
       go_editor    TYPE REF TO cl_gui_textedit,
       gs_smimloio  TYPE smimloio.
 
-PARAMETERS: p_loio TYPE smimloio-loio_id OBLIGATORY.
+TYPES: ty_nodes TYPE STANDARD TABLE OF mtreesnode WITH DEFAULT KEY.
 
+PARAMETERS: p_loio TYPE smimloio-loio_id OBLIGATORY,
+            p_devc TYPE devclass OBLIGATORY.
+
+INCLUDE zmime_editor_smim.
 INCLUDE zmime_editor_f01.
 INCLUDE zmime_editor_o01.
 INCLUDE zmime_editor_i01.
