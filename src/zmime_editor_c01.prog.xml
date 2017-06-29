@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZMIME_EDITOR_SMIM</NAME>
+    <NAME>ZMIME_EDITOR_C01</NAME>
     <STATE>A</STATE>
     <VARCL>X</VARCL>
     <SUBC>I</SUBC>

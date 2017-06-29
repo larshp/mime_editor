@@ -7,21 +7,25 @@ CLASS lcl_smim DEFINITION FINAL.
   PUBLIC SECTION.
     CLASS-METHODS:
       get_content
+        IMPORTING is_smim           TYPE ty_smim
         RETURNING VALUE(rv_content) TYPE string,
       get_url
-        IMPORTING io_lo_class   TYPE smimloio-lo_class
-                  io_loio_id    TYPE smimloio-loio_id
+        IMPORTING is_smim       TYPE ty_smim
         RETURNING VALUE(rv_url) TYPE string,
       save
-        IMPORTING iv_string TYPE string.
+        IMPORTING is_smim   TYPE ty_smim
+                  iv_string TYPE string.
 
 ENDCLASS.
 
 CLASS lcl_tree_content DEFINITION FINAL.
 
   PUBLIC SECTION.
-    CLASS-METHODS: build
-      RETURNING VALUE(rt_nodes) TYPE ty_nodes.
+    CLASS-METHODS:
+      init,
+      get_by_key
+        IMPORTING iv_key         TYPE tv_nodekey
+        RETURNING VALUE(rs_smim) TYPE ty_smim.
 
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_smim,
@@ -33,11 +37,61 @@ CLASS lcl_tree_content DEFINITION FINAL.
 
     CLASS-DATA: mt_smim TYPE STANDARD TABLE OF ty_smim WITH DEFAULT KEY.
 
-    CLASS-METHODS: find_smim.
+    CLASS-METHODS:
+      build
+        RETURNING VALUE(rt_nodes) TYPE ty_nodes,
+      find_smim.
 
 ENDCLASS.
 
 CLASS lcl_tree_content IMPLEMENTATION.
+
+  METHOD get_by_key.
+
+    DATA: ls_smim LIKE LINE OF mt_smim.
+
+    READ TABLE mt_smim INTO ls_smim WITH KEY key = iv_key.
+    ASSERT sy-subrc = 0.
+
+    MOVE-CORRESPONDING ls_smim TO rs_smim.
+
+  ENDMETHOD.
+
+  METHOD init.
+
+    DATA: lt_events TYPE cntl_simple_events,
+          lt_nodes  TYPE ty_nodes,
+          ls_event  LIKE LINE OF lt_events.
+
+
+    ls_event-eventid = cl_gui_simple_tree=>eventid_node_double_click.
+    ls_event-appl_event = abap_true.
+    APPEND ls_event TO lt_events.
+
+    go_tree->set_registered_events(
+      EXPORTING
+        events                    = lt_events
+      EXCEPTIONS
+        cntl_error                = 1
+        cntl_system_error         = 2
+        illegal_event_combination = 3 ).
+    ASSERT sy-subrc = 0.
+
+    lt_nodes = lcl_tree_content=>build( ).
+
+    go_tree->add_nodes(
+      EXPORTING
+        table_structure_name           = 'MTREESNODE'
+        node_table                     = lt_nodes
+      EXCEPTIONS
+        failed                         = 1
+        error_in_node_table            = 2
+        dp_error                       = 3
+        table_structure_name_not_found = 4
+        OTHERS                         = 5 ).
+    ASSERT sy-subrc = 0.
+
+  ENDMETHOD.
 
   METHOD build.
 
@@ -55,27 +109,31 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
   METHOD find_smim.
 
-    DATA: lv_index    TYPE i,
-          ls_smimloio TYPE smimloio.
+    TYPES: BEGIN OF ty_tadir,
+             obj_name TYPE tadir-obj_name,
+           END OF ty_tadir.
+
+    DATA: lv_index TYPE i,
+          lt_tadir TYPE STANDARD TABLE OF ty_tadir WITH DEFAULT KEY,
+          ls_smim  LIKE gs_smim.
 
 
-    SELECT * FROM tadir INTO TABLE @DATA(lt_tadir)
-      WHERE devclass = @p_devc
-      AND object = 'SMIM'.
+    SELECT obj_name FROM tadir INTO TABLE lt_tadir
+      WHERE devclass = p_devc
+      AND object = 'SMIM'.                              "#EC CI_GENBUFF
 
     LOOP AT lt_tadir INTO DATA(ls_tadir).
       lv_index = sy-tabix.
 
-      SELECT SINGLE * FROM smimloio INTO ls_smimloio
+      SELECT SINGLE * FROM smimloio
+        INTO CORRESPONDING FIELDS OF ls_smim
         WHERE loio_id = ls_tadir-obj_name.              "#EC CI_GENBUFF
-      IF sy-subrc <> 0 OR ls_smimloio-lo_class = wbmr_c_skwf_folder_class.
+      IF sy-subrc <> 0 OR ls_smim-lo_class = wbmr_c_skwf_folder_class.
 * ignore folders
         CONTINUE.
       ENDIF.
 
-      DATA(lv_url) = lcl_smim=>get_url(
-        io_lo_class = ls_smimloio-lo_class
-        io_loio_id  = ls_smimloio-loio_id ).
+      DATA(lv_url) = lcl_smim=>get_url( ls_smim ).
 
       IF lv_url CP '*.svg' OR lv_url CP '*.png'.
         CONTINUE.
@@ -84,8 +142,8 @@ CLASS lcl_tree_content IMPLEMENTATION.
       APPEND VALUE #(
         key      = |KEY{ lv_index }|
         text     = lv_url
-        lo_class = ls_smimloio-lo_class
-        loio_id  = ls_smimloio-loio_id ) TO mt_smim.
+        lo_class = ls_smim-lo_class
+        loio_id  = ls_smim-loio_id ) TO mt_smim.
     ENDLOOP.
 
   ENDMETHOD.
@@ -103,9 +161,7 @@ CLASS lcl_smim IMPLEMENTATION.
           lo_obj     TYPE REF TO cl_abap_conv_in_ce.
 
 
-    lv_url = lcl_smim=>get_url(
-      io_lo_class = gs_smimloio-lo_class
-      io_loio_id  = gs_smimloio-loio_id ).
+    lv_url = lcl_smim=>get_url( is_smim ).
 
     li_api = cl_mime_repository_api=>if_mr_api~get_api( ).
 
@@ -148,8 +204,8 @@ CLASS lcl_smim IMPLEMENTATION.
 
 
     ls_io-objtype = skwfc_obtype_loio.
-    ls_io-class = io_lo_class.
-    ls_io-objid = io_loio_id.
+    ls_io-class = is_smim-lo_class.
+    ls_io-objid = is_smim-loio_id.
 
     CALL FUNCTION 'SKWF_NMSPC_IO_ADDRESS_GET'
       EXPORTING
@@ -172,6 +228,7 @@ CLASS lcl_smim IMPLEMENTATION.
           lt_strings  TYPE TABLE OF string,
           lo_obj      TYPE REF TO cl_abap_conv_out_ce.
 
+
     TRY.
         lo_obj = cl_abap_conv_out_ce=>create( encoding = 'UTF-8' ).
         lo_obj->convert( EXPORTING data = iv_string
@@ -183,9 +240,7 @@ CLASS lcl_smim IMPLEMENTATION.
         BREAK-POINT.
     ENDTRY.
 
-    lv_url = lcl_smim=>get_url(
-      io_lo_class = gs_smimloio-lo_class
-      io_loio_id = gs_smimloio-loio_id ).
+    lv_url = lcl_smim=>get_url( is_smim ).
 
     SPLIT lv_url AT '/' INTO TABLE lt_strings.
     lv_lines = lines( lt_strings ).
@@ -193,7 +248,7 @@ CLASS lcl_smim IMPLEMENTATION.
     READ TABLE lt_strings INDEX lv_lines INTO lv_filename.
     ASSERT sy-subrc = 0.
 
-    ls_skwf_io-objid = p_loio.
+    ls_skwf_io-objid = gs_smim-loio_id.
 
     cl_wb_mime_repository=>determine_io_class(
       EXPORTING
@@ -220,6 +275,106 @@ CLASS lcl_smim IMPLEMENTATION.
     IF sy-subrc <> 0.
       BREAK-POINT.
     ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS lcl_editor DEFINITION FINAL.
+
+  PUBLIC SECTION.
+    CLASS-METHODS:
+      save,
+      is_dirty RETURNING VALUE(rv_dirty) TYPE abap_bool,
+      switch IMPORTING is_smim TYPE ty_smim.
+
+  PRIVATE SECTION.
+    CLASS-DATA:
+      ms_smim TYPE ty_smim.
+
+ENDCLASS.
+
+CLASS lcl_editor IMPLEMENTATION.
+
+  METHOD is_dirty.
+
+    DATA: lv_status TYPE i.
+
+
+    IF ms_smim IS INITIAL.
+      rv_dirty = abap_false.
+      RETURN.
+    ENDIF.
+
+    go_editor->get_textmodified_status( IMPORTING status = lv_status ).
+    cl_gui_cfw=>flush( ).
+
+    IF lv_status = 0.
+      rv_dirty = abap_false.
+    ELSE.
+      rv_dirty = abap_true.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD save.
+
+    DATA: lv_string TYPE string.
+
+
+    IF is_dirty( ) = abap_false.
+      MESSAGE 'Nothing changed'(005) TYPE 'S'.
+      RETURN.
+    ENDIF.
+
+    go_editor->get_textstream( IMPORTING text = lv_string ).
+    cl_gui_cfw=>flush( ).
+    lcl_smim=>save( is_smim   = ms_smim
+                    iv_string = lv_string ).
+    MESSAGE 'Saved'(003) TYPE 'S'.
+    go_editor->set_textmodified_status( 0 ).
+
+  ENDMETHOD.
+
+  METHOD switch.
+
+    DATA: lv_content TYPE string.
+
+
+    IF is_dirty( ) = abap_true.
+      MESSAGE 'Not saved'(004) TYPE 'W'.
+      RETURN.
+    ENDIF.
+
+    ms_smim = is_smim.
+
+    go_editor->set_enable( abap_true ).
+    go_editor->set_readonly_mode( 0 ).
+    lv_content = lcl_smim=>get_content( ms_smim ).
+    go_editor->set_textstream( lv_content ).
+    go_editor->set_focus( go_editor ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS lcl_handler DEFINITION FINAL.
+
+  PUBLIC SECTION.
+    CLASS-METHODS:
+      double_click FOR EVENT node_double_click OF cl_gui_simple_tree
+        IMPORTING node_key.
+
+ENDCLASS.
+
+CLASS lcl_handler IMPLEMENTATION.
+
+  METHOD double_click.
+
+    DATA: ls_smim LIKE gs_smim.
+
+    ls_smim = lcl_tree_content=>get_by_key( node_key ).
+    lcl_editor=>switch( ls_smim ).
 
   ENDMETHOD.
 
