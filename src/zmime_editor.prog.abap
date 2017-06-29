@@ -26,14 +26,23 @@ REPORT zmime_editor.
 * SOFTWARE.
 ********************************************************************************
 
+TYPES: BEGIN OF ty_smim,
+         loio_id  TYPE sdok_loid,
+         lo_class TYPE sdok_locl,
+       END OF ty_smim.
+
 DATA: gv_ok_code   LIKE sy-ucomm,
-      gv_init      TYPE abap_bool,
       go_container TYPE REF TO cl_gui_custom_container,
+      go_splitter  TYPE REF TO cl_gui_easy_splitter_container,
+      go_tree      TYPE REF TO cl_gui_simple_tree,
       go_editor    TYPE REF TO cl_gui_textedit,
-      gs_smimloio  TYPE smimloio.
+      gs_smim      TYPE ty_smim.
 
-PARAMETERS: p_loio TYPE smimloio-loio_id OBLIGATORY.
+TYPES: ty_nodes TYPE STANDARD TABLE OF mtreesnode WITH DEFAULT KEY.
 
+PARAMETERS: p_devc TYPE devclass OBLIGATORY.
+
+INCLUDE zmime_editor_c01.
 INCLUDE zmime_editor_f01.
 INCLUDE zmime_editor_o01.
 INCLUDE zmime_editor_i01.

@@ -107,6 +107,14 @@
       <FUN_TEXT>Back</FUN_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
+      <CODE>BACK</CODE>
+      <TEXTNO>002</TEXTNO>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <TEXT_NAME>ICON_CANCEL</TEXT_NAME>
+      <ICON_ID>@0W@</ICON_ID>
+      <FUN_TEXT>Cancel</FUN_TEXT>
+     </RSMPE_FUNT>
+     <RSMPE_FUNT>
       <CODE>SAVE</CODE>
       <TEXTNO>001</TEXTNO>
       <TEXT_TYPE>S</TEXT_TYPE>
@@ -127,6 +135,12 @@
       <PFNO>11</PFNO>
       <FUNCODE>SAVE</FUNCODE>
       <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>12</PFNO>
+      <FUNCODE>BACK</FUNCODE>
+      <FUNNO>002</FUNNO>
      </RSMPE_PFK>
     </PFK>
     <SET>
@@ -163,23 +177,11 @@
     <TIT>
      <RSMPE_TITT>
       <CODE>TITLE_2000</CODE>
-      <TEXT>MIME Editor</TEXT>
+      <TEXT>MIME Editor - &amp;1</TEXT>
      </RSMPE_TITT>
     </TIT>
    </CUA>
    <TPOOL>
-    <item>
-     <ID>I</ID>
-     <KEY>001</KEY>
-     <ENTRY>Not found</ENTRY>
-     <LENGTH>18</LENGTH>
-    </item>
-    <item>
-     <ID>I</ID>
-     <KEY>002</KEY>
-     <ENTRY>Is folder</ENTRY>
-     <LENGTH>19</LENGTH>
-    </item>
     <item>
      <ID>I</ID>
      <KEY>003</KEY>
@@ -193,15 +195,21 @@
      <LENGTH>19</LENGTH>
     </item>
     <item>
+     <ID>I</ID>
+     <KEY>005</KEY>
+     <ENTRY>Nothing changed</ENTRY>
+     <LENGTH>25</LENGTH>
+    </item>
+    <item>
      <ID>R</ID>
      <ENTRY>MIME Editor</ENTRY>
      <LENGTH>11</LENGTH>
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_LOIO</KEY>
+     <KEY>P_DEVC</KEY>
      <ENTRY>.</ENTRY>
-     <LENGTH>24</LENGTH>
+     <LENGTH>15</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
    </TPOOL>

@@ -12,7 +12,7 @@ MODULE user_command_2000 INPUT.
   CASE gv_ok_code.
     WHEN 'SAVE'.
       CLEAR gv_ok_code.
-      PERFORM save.
+      lcl_editor=>save( ).
     WHEN 'BACK'.
       CLEAR gv_ok_code.
       PERFORM back.
