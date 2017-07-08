@@ -122,6 +122,12 @@
       <ICON_ID>@2L@</ICON_ID>
       <FUN_TEXT>Save</FUN_TEXT>
      </RSMPE_FUNT>
+     <RSMPE_FUNT>
+      <CODE>SAVE2</CODE>
+      <TEXTNO>001</TEXTNO>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <FUN_TEXT>Save</FUN_TEXT>
+     </RSMPE_FUNT>
     </FUN>
     <PFK>
      <RSMPE_PFK>
@@ -142,6 +148,12 @@
       <FUNCODE>BACK</FUNCODE>
       <FUNNO>002</FUNNO>
      </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>27</PFNO>
+      <FUNCODE>SAVE2</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
     </PFK>
     <SET>
      <RSMPE_STAF>
@@ -151,6 +163,10 @@
      <RSMPE_STAF>
       <STATUS>STATUS_2000</STATUS>
       <FUNCTION>SAVE</FUNCTION>
+     </RSMPE_STAF>
+     <RSMPE_STAF>
+      <STATUS>STATUS_2000</STATUS>
+      <FUNCTION>SAVE2</FUNCTION>
      </RSMPE_STAF>
     </SET>
     <DOC>
