@@ -38,7 +38,12 @@ DATA: gv_ok_code   LIKE sy-ucomm,
       go_editor    TYPE REF TO cl_gui_textedit,
       gs_smim      TYPE ty_smim.
 
-TYPES: ty_nodes TYPE STANDARD TABLE OF mtreesnode WITH DEFAULT KEY.
+TYPES: BEGIN OF ty_node.
+    INCLUDE STRUCTURE treev_node.
+TYPES: text TYPE text50,
+       END OF ty_node.
+
+TYPES: ty_nodes TYPE STANDARD TABLE OF ty_node WITH DEFAULT KEY.
 
 PARAMETERS: p_devc TYPE devclass OBLIGATORY.
 
