@@ -135,7 +135,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
       DATA(lv_url) = lcl_smim=>get_url( ls_smim ).
 
-      IF lv_url CP '*.svg' OR lv_url CP '*.png'.
+      IF lv_url CP '*.png'.
         CONTINUE.
       ENDIF.
 
