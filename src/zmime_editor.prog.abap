@@ -45,7 +45,7 @@ TYPES: text TYPE text50,
 
 TYPES: ty_nodes TYPE STANDARD TABLE OF ty_node WITH DEFAULT KEY.
 
-PARAMETERS: p_devc TYPE devclass OBLIGATORY.
+PARAMETERS: p_devc TYPE devclass MEMORY ID dvc OBLIGATORY.
 
 INCLUDE zmime_editor_c01.
 INCLUDE zmime_editor_f01.

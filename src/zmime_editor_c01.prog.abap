@@ -77,7 +77,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
         illegal_event_combination = 3 ).
     ASSERT sy-subrc = 0.
 
-    lt_nodes = lcl_tree_content=>build( ).
+    lt_nodes = build( ).
 
     go_tree->add_nodes(
       EXPORTING
@@ -118,16 +118,19 @@ CLASS lcl_tree_content IMPLEMENTATION.
           ls_smim  LIKE gs_smim.
 
 
-    SELECT obj_name FROM tadir INTO TABLE lt_tadir
-      WHERE devclass = p_devc
+    SELECT obj_name FROM tadir INTO TABLE @lt_tadir
+      WHERE devclass = @p_devc
       AND object = 'SMIM'.                              "#EC CI_GENBUFF
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
 
     LOOP AT lt_tadir INTO DATA(ls_tadir).
       lv_index = sy-tabix.
 
       SELECT SINGLE * FROM smimloio
-        INTO CORRESPONDING FIELDS OF ls_smim
-        WHERE loio_id = ls_tadir-obj_name.              "#EC CI_GENBUFF
+        INTO CORRESPONDING FIELDS OF @ls_smim
+        WHERE loio_id = @ls_tadir-obj_name.             "#EC CI_GENBUFF
       IF sy-subrc <> 0 OR ls_smim-lo_class = wbmr_c_skwf_folder_class.
 * ignore folders
         CONTINUE.
@@ -161,7 +164,7 @@ CLASS lcl_smim IMPLEMENTATION.
           lo_obj     TYPE REF TO cl_abap_conv_in_ce.
 
 
-    lv_url = lcl_smim=>get_url( is_smim ).
+    lv_url = get_url( is_smim ).
 
     li_api = cl_mime_repository_api=>if_mr_api~get_api( ).
 
@@ -240,7 +243,7 @@ CLASS lcl_smim IMPLEMENTATION.
         BREAK-POINT.
     ENDTRY.
 
-    lv_url = lcl_smim=>get_url( is_smim ).
+    lv_url = get_url( is_smim ).
 
     SPLIT lv_url AT '/' INTO TABLE lt_strings.
     lv_lines = lines( lt_strings ).
@@ -309,11 +312,7 @@ CLASS lcl_editor IMPLEMENTATION.
     go_editor->get_textmodified_status( IMPORTING status = lv_status ).
     cl_gui_cfw=>flush( ).
 
-    IF lv_status = 0.
-      rv_dirty = abap_false.
-    ELSE.
-      rv_dirty = abap_true.
-    ENDIF.
+    rv_dirty = xsdbool( NOT lv_status = 0 ).
 
   ENDMETHOD.
 
