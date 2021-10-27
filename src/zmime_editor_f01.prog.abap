@@ -18,27 +18,21 @@ ENDFORM.
 
 FORM init_2000.
 
-  IF NOT go_container IS BOUND.
-    CREATE OBJECT go_container
-      EXPORTING
-        container_name = 'CUSTOM_2000'.
+  IF go_container IS NOT BOUND.
+    go_container = NEW #( container_name = 'CUSTOM_2000' ).
 
-    CREATE OBJECT go_splitter
-      EXPORTING
-        parent      = go_container
-        orientation = 1.
-    go_splitter->set_sash_position( 20 ).
+    go_splitter = NEW #(
+      parent      = go_container
+      orientation = 1 ).
+    go_splitter->set_sash_position( 30 ).
 
-    CREATE OBJECT go_tree
-      EXPORTING
-        parent              = go_splitter->top_left_container
-        node_selection_mode = cl_gui_simple_tree=>node_sel_mode_single.
+    go_tree = NEW #(
+      parent              = go_splitter->top_left_container
+      node_selection_mode = cl_gui_simple_tree=>node_sel_mode_single ).
     SET HANDLER lcl_handler=>double_click FOR go_tree.
     lcl_tree_content=>init( ).
 
-    CREATE OBJECT go_editor
-      EXPORTING
-        parent = go_splitter->bottom_right_container.
+    go_editor = NEW #( parent = go_splitter->bottom_right_container ).
     go_editor->set_font_fixed( ).
     go_editor->set_enable( abap_false ).
     go_editor->set_readonly_mode( 1 ).

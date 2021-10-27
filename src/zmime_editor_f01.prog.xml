@@ -11,8 +11,8 @@
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>Include ZMIME_EDITOR_F01</ENTRY>
-     <LENGTH>24</LENGTH>
+     <ENTRY>MIME Editor (for SMIM objects)</ENTRY>
+     <LENGTH>30</LENGTH>
     </item>
    </TPOOL>
   </asx:values>
