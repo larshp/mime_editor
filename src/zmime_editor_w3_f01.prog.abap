@@ -18,7 +18,7 @@ ENDFORM.
 
 FORM init_2000.
 
-  IF NOT go_container IS BOUND.
+  IF go_container IS NOT BOUND.
     go_container = NEW #( container_name = 'CUSTOM_2000' ).
 
     go_splitter = NEW #(
@@ -33,7 +33,6 @@ FORM init_2000.
     lcl_tree_content=>init( ).
 
     lcl_editor=>init( ).
-
   ENDIF.
 
 ENDFORM.
