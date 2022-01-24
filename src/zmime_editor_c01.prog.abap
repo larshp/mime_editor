@@ -35,7 +35,7 @@ CLASS lcl_tree_content DEFINITION FINAL.
              loio_id  TYPE smimloio-loio_id,
            END OF ty_smim.
 
-    CLASS-DATA: mt_smim TYPE STANDARD TABLE OF ty_smim WITH DEFAULT KEY.
+    CLASS-DATA mt_smim TYPE STANDARD TABLE OF ty_smim WITH KEY key.
 
     CLASS-METHODS:
       build
@@ -48,12 +48,12 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
   METHOD get_by_key.
 
-    DATA: ls_smim LIKE LINE OF mt_smim.
+    DATA ls_smim LIKE LINE OF mt_smim.
 
     READ TABLE mt_smim INTO ls_smim WITH KEY key = iv_key.
     ASSERT sy-subrc = 0.
 
-    MOVE-CORRESPONDING ls_smim TO rs_smim.
+    rs_smim = CORRESPONDING #( ls_smim ).
 
   ENDMETHOD.
 
@@ -95,7 +95,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
   METHOD build.
 
-    DATA: ls_node LIKE LINE OF rt_nodes.
+    DATA ls_node LIKE LINE OF rt_nodes.
 
     find_smim( ).
 
@@ -114,13 +114,13 @@ CLASS lcl_tree_content IMPLEMENTATION.
            END OF ty_tadir.
 
     DATA: lv_index TYPE i,
-          lt_tadir TYPE STANDARD TABLE OF ty_tadir WITH DEFAULT KEY,
+          lt_tadir TYPE STANDARD TABLE OF ty_tadir WITH KEY obj_name,
           ls_smim  LIKE gs_smim.
 
 
     SELECT obj_name FROM tadir INTO TABLE @lt_tadir
       WHERE devclass = @p_devc
-      AND object = 'SMIM'.                              "#EC CI_GENBUFF
+      AND object = 'SMIM' ORDER BY obj_name.            "#EC CI_GENBUFF
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
@@ -292,7 +292,7 @@ CLASS lcl_editor DEFINITION FINAL.
       switch IMPORTING is_smim TYPE ty_smim.
 
   PRIVATE SECTION.
-    CLASS-DATA:
+    CLASS-DATA
       ms_smim TYPE ty_smim.
 
 ENDCLASS.
@@ -301,7 +301,7 @@ CLASS lcl_editor IMPLEMENTATION.
 
   METHOD is_dirty.
 
-    DATA: lv_status TYPE i.
+    DATA lv_status TYPE i.
 
 
     IF ms_smim IS INITIAL.
@@ -312,13 +312,13 @@ CLASS lcl_editor IMPLEMENTATION.
     go_editor->get_textmodified_status( IMPORTING status = lv_status ).
     cl_gui_cfw=>flush( ).
 
-    rv_dirty = xsdbool( NOT lv_status = 0 ).
+    rv_dirty = xsdbool( lv_status <> 0 ).
 
   ENDMETHOD.
 
   METHOD save.
 
-    DATA: lv_string TYPE string.
+    DATA lv_string TYPE string.
 
 
     IF is_dirty( ) = abap_false.
@@ -337,7 +337,7 @@ CLASS lcl_editor IMPLEMENTATION.
 
   METHOD switch.
 
-    DATA: lv_content TYPE string.
+    DATA lv_content TYPE string.
 
 
     IF is_dirty( ) = abap_true.
@@ -360,7 +360,7 @@ ENDCLASS.
 CLASS lcl_handler DEFINITION FINAL.
 
   PUBLIC SECTION.
-    CLASS-METHODS:
+    CLASS-METHODS
       double_click FOR EVENT node_double_click OF cl_gui_simple_tree
         IMPORTING node_key.
 
@@ -370,7 +370,7 @@ CLASS lcl_handler IMPLEMENTATION.
 
   METHOD double_click.
 
-    DATA: ls_smim LIKE gs_smim.
+    DATA ls_smim LIKE gs_smim.
 
     ls_smim = lcl_tree_content=>get_by_key( node_key ).
     lcl_editor=>switch( ls_smim ).

@@ -38,14 +38,14 @@ DATA: gv_ok_code   LIKE sy-ucomm,
       go_editor    TYPE REF TO cl_gui_textedit,
       gs_smim      TYPE ty_smim.
 
-TYPES: BEGIN OF ty_node.
-    INCLUDE STRUCTURE treev_node.
+TYPES BEGIN OF ty_node.
+INCLUDE STRUCTURE treev_node.
 TYPES: text TYPE text50,
-       END OF ty_node.
+  END OF ty_node.
 
-TYPES: ty_nodes TYPE STANDARD TABLE OF ty_node WITH DEFAULT KEY.
+TYPES ty_nodes TYPE STANDARD TABLE OF ty_node WITH KEY node_key.
 
-PARAMETERS: p_devc TYPE devclass MEMORY ID dvc OBLIGATORY.
+PARAMETERS p_devc TYPE devclass MEMORY ID dvc OBLIGATORY.
 
 INCLUDE zmime_editor_c01.
 INCLUDE zmime_editor_f01.
