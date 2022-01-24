@@ -5,7 +5,7 @@
 CLASS lcl_smim DEFINITION FINAL.
 
   PUBLIC SECTION.
-    TYPES:
+    TYPES
       ty_wwwparams_tt TYPE STANDARD TABLE OF wwwparams WITH KEY relid objid name.
 
     CONSTANTS:
@@ -69,7 +69,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
     READ TABLE mt_smim INTO ls_smim WITH KEY key = iv_key.
     ASSERT sy-subrc = 0.
 
-    MOVE-CORRESPONDING ls_smim TO rs_smim.
+    rs_smim = CORRESPONDING #( ls_smim ).
 
   ENDMETHOD.
 
@@ -135,8 +135,8 @@ CLASS lcl_tree_content IMPLEMENTATION.
           lv_ext      TYPE string,
           lt_w3params TYPE lcl_smim=>ty_wwwparams_tt.
 
-    SELECT obj_name FROM tadir INTO TABLE lt_tadir
-      WHERE devclass = p_devc
+    SELECT obj_name FROM tadir INTO TABLE @lt_tadir
+      WHERE devclass = @p_devc
       AND object = 'W3MI' ORDER BY obj_name.            "#EC CI_GENBUFF
     IF sy-subrc <> 0.
       RETURN.
@@ -148,8 +148,8 @@ CLASS lcl_tree_content IMPLEMENTATION.
       ls_smim-relid = 'MI'.
       ls_smim-objid = ls_tadir-obj_name.
 
-      SELECT SINGLE * INTO CORRESPONDING FIELDS OF ls_smim FROM wwwdata
-        WHERE relid = ls_smim-relid AND objid = ls_smim-objid AND srtf2 = 0.
+      SELECT SINGLE * INTO CORRESPONDING FIELDS OF @ls_smim FROM wwwdata
+        WHERE relid = @ls_smim-relid AND objid = @ls_smim-objid AND srtf2 = 0.
       IF sy-subrc <> 0.
         " does not exist
         CONTINUE.
@@ -206,7 +206,7 @@ CLASS lcl_smim IMPLEMENTATION.
           lt_w3params TYPE ty_wwwparams_tt,
           lv_size     TYPE i.
 
-    MOVE-CORRESPONDING is_smim TO ls_key.
+    ls_key = CORRESPONDING #( is_smim ).
 
     CALL FUNCTION 'WWWDATA_IMPORT'
       EXPORTING
@@ -269,7 +269,7 @@ CLASS lcl_smim IMPLEMENTATION.
           lv_size     TYPE i,
           ls_key      TYPE wwwdatatab.
 
-    MOVE-CORRESPONDING is_smim TO ls_key.
+    ls_key = CORRESPONDING #( is_smim ).
 
     lv_string = iv_string.
     REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>cr_lf IN lv_string WITH cl_abap_char_utilities=>newline.
@@ -428,7 +428,6 @@ CLASS lcl_editor IMPLEMENTATION.
   METHOD save.
 
     DATA lt_string TYPE string_table.
-    DATA lv_string TYPE string.
 
     IF is_dirty( ) = abap_false.
       MESSAGE 'Nothing changed'(005) TYPE 'S'.
