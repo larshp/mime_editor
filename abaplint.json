@@ -19,7 +19,10 @@
   "syntax": {
     "version": "v755",
     "errorNamespace": "^(Z|Y|LCL_|TY_|LIF_)",
-    "globalConstants": [],
+    "globalConstants": [
+      "skwfc_obtype_loio",
+      "wbmr_c_skwf_folder_class"
+    ],
     "globalMacros": []
   },
   "rules": {
