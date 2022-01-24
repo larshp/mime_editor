@@ -234,7 +234,7 @@ CLASS lcl_smim IMPLEMENTATION.
 
     TRY.
         lo_obj = cl_abap_conv_out_ce=>create( encoding = 'UTF-8' ).
-        lo_obj->convert( EXPORTING data = iv_string
+        lo_obj->convert( EXPORTING data   = iv_string
                          IMPORTING buffer = lv_content ).
       CATCH cx_parameter_invalid_range
             cx_sy_codepage_converter_init
