@@ -30,6 +30,7 @@ TYPES: BEGIN OF ty_smim,
          relid TYPE wwwdata-relid,
          objid TYPE wwwdata-objid,
          ext   TYPE string,
+         text  TYPE wwwdata-text,
        END OF ty_smim.
 
 DATA: gv_ok_code   LIKE sy-ucomm,

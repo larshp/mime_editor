@@ -6,7 +6,7 @@ CLASS lcl_smim DEFINITION FINAL.
 
   PUBLIC SECTION.
     TYPES:
-      ty_wwwparams_tt TYPE STANDARD TABLE OF wwwparams WITH DEFAULT KEY.
+      ty_wwwparams_tt TYPE STANDARD TABLE OF wwwparams WITH KEY relid objid name.
 
     CONSTANTS:
       BEGIN OF gc_param_names,
@@ -51,7 +51,7 @@ CLASS lcl_tree_content DEFINITION FINAL.
              ext   TYPE string,
            END OF ty_smim.
 
-    CLASS-DATA: mt_smim TYPE STANDARD TABLE OF ty_smim WITH DEFAULT KEY.
+    CLASS-DATA mt_smim TYPE STANDARD TABLE OF ty_smim WITH DEFAULT KEY.
 
     CLASS-METHODS:
       build
@@ -64,7 +64,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
   METHOD get_by_key.
 
-    DATA: ls_smim LIKE LINE OF mt_smim.
+    DATA ls_smim LIKE LINE OF mt_smim.
 
     READ TABLE mt_smim INTO ls_smim WITH KEY key = iv_key.
     ASSERT sy-subrc = 0.
@@ -110,7 +110,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
   METHOD build.
 
-    DATA: ls_node LIKE LINE OF rt_nodes.
+    DATA ls_node LIKE LINE OF rt_nodes.
 
     find_smim( ).
 
@@ -129,7 +129,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
            END OF ty_tadir.
 
     DATA: lv_index    TYPE i,
-          lt_tadir    TYPE STANDARD TABLE OF ty_tadir WITH DEFAULT KEY,
+          lt_tadir    TYPE STANDARD TABLE OF ty_tadir WITH KEY obj_name,
           ls_smim     LIKE gs_smim,
           lv_file     TYPE string,
           lv_ext      TYPE string,
@@ -137,7 +137,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
     SELECT obj_name FROM tadir INTO TABLE lt_tadir
       WHERE devclass = p_devc
-      AND object = 'W3MI'.                              "#EC CI_GENBUFF
+      AND object = 'W3MI' ORDER BY obj_name.            "#EC CI_GENBUFF
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
@@ -180,9 +180,13 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
       ENDIF.
 
+      IF ls_smim-text IS INITIAL.
+        ls_smim-text = |{ ls_smim-objid } ({ lv_file })|.
+      ENDIF.
+
       APPEND VALUE #(
         key   = |KEY{ lv_index }|
-        text  = |{ ls_smim-objid } ({ lv_file })|
+        text  = ls_smim-text
         relid = ls_smim-relid
         objid = ls_smim-objid
         ext   = lv_ext ) TO mt_smim.
@@ -199,7 +203,7 @@ CLASS lcl_smim IMPLEMENTATION.
     DATA: ls_key      TYPE wwwdatatab,
           lt_w3mime   TYPE STANDARD TABLE OF w3mime,
           lt_w3html   TYPE STANDARD TABLE OF w3html,
-          lt_w3params TYPE STANDARD TABLE OF wwwparams,
+          lt_w3params TYPE ty_wwwparams_tt,
           lv_size     TYPE i.
 
     MOVE-CORRESPONDING is_smim TO ls_key.
@@ -261,14 +265,14 @@ CLASS lcl_smim IMPLEMENTATION.
           lv_xstring  TYPE xstring,
           lt_w3mime   TYPE STANDARD TABLE OF w3mime,
           lt_w3html   TYPE STANDARD TABLE OF w3html,
-          lt_w3params TYPE STANDARD TABLE OF wwwparams,
+          lt_w3params TYPE ty_wwwparams_tt,
           lv_size     TYPE i,
           ls_key      TYPE wwwdatatab.
 
     MOVE-CORRESPONDING is_smim TO ls_key.
 
     lv_string = iv_string.
-    REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>cr_lf IN lv_string WITH  cl_abap_char_utilities=>newline.
+    REPLACE ALL OCCURRENCES OF cl_abap_char_utilities=>cr_lf IN lv_string WITH cl_abap_char_utilities=>newline.
 
     CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
       EXPORTING
@@ -394,21 +398,20 @@ ENDCLASS.
 CLASS lcl_editor IMPLEMENTATION.
 
   METHOD init.
-    CREATE OBJECT go_editor
-      EXPORTING
-        parent           = go_splitter->bottom_right_container
-        max_number_chars = 1000.
+    go_editor = NEW #(
+      parent           = go_splitter->bottom_right_container
+      max_number_chars = 1000 ).
 
     go_editor->set_enable( abap_false ).
     go_editor->set_readonly_mode( cl_gui_sourceedit=>true ).
-    go_editor->set_toolbar_mode( cl_gui_sourceedit=>true ).
     go_editor->set_source_type( iv_source_type ).
     go_editor->create_document( ).
+    go_editor->set_toolbar_mode( cl_gui_sourceedit=>true ).
   ENDMETHOD.
 
   METHOD is_dirty.
 
-    DATA: lv_status TYPE i.
+    DATA lv_status TYPE i.
 
     IF ms_smim IS INITIAL.
       rv_dirty = abap_false.
@@ -418,18 +421,14 @@ CLASS lcl_editor IMPLEMENTATION.
     go_editor->get_textmodified_status( IMPORTING status = lv_status ).
     cl_gui_cfw=>flush( ).
 
-    IF lv_status = 0.
-      rv_dirty = abap_false.
-    ELSE.
-      rv_dirty = abap_true.
-    ENDIF.
+    rv_dirty = xsdbool( lv_status <> 0 ).
 
   ENDMETHOD.
 
   METHOD save.
 
-    DATA: lt_string TYPE string_table.
-    DATA: lv_string TYPE string.
+    DATA lt_string TYPE string_table.
+    DATA lv_string TYPE string.
 
     IF is_dirty( ) = abap_false.
       MESSAGE 'Nothing changed'(005) TYPE 'S'.
@@ -447,7 +446,7 @@ CLASS lcl_editor IMPLEMENTATION.
 
   METHOD switch.
 
-    DATA: lv_content TYPE string.
+    DATA lv_content TYPE string.
 
     IF is_dirty( ) = abap_true.
       MESSAGE 'Not saved'(004) TYPE 'W'.
@@ -493,7 +492,7 @@ ENDCLASS.
 CLASS lcl_handler DEFINITION FINAL.
 
   PUBLIC SECTION.
-    CLASS-METHODS:
+    CLASS-METHODS
       double_click FOR EVENT node_double_click OF cl_gui_simple_tree
         IMPORTING node_key.
 
@@ -503,7 +502,7 @@ CLASS lcl_handler IMPLEMENTATION.
 
   METHOD double_click.
 
-    DATA: ls_smim LIKE gs_smim.
+    DATA ls_smim LIKE gs_smim.
 
     ls_smim = lcl_tree_content=>get_by_key( node_key ).
     lcl_editor=>switch( ls_smim ).
