@@ -202,10 +202,7 @@
       "importDynpro": true,
       "dynamicSQL": true
     },
-    "db_operation_in_loop": {
-      "exclude": [],
-      "severity": "Error"
-    },
+    "db_operation_in_loop": false,
     "definitions_top": {
       "exclude": [],
       "severity": "Error"
