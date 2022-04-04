@@ -218,6 +218,12 @@
      <LENGTH>15</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_OBJ</KEY>
+     <ENTRY>Object Name</ENTRY>
+     <LENGTH>19</LENGTH>
+    </item>
    </TPOOL>
   </asx:values>
  </asx:abap>

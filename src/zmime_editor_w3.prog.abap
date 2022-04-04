@@ -48,6 +48,7 @@ TYPES: text TYPE text50,
 TYPES ty_nodes TYPE STANDARD TABLE OF ty_node WITH KEY node_key.
 
 PARAMETERS p_devc TYPE devclass MEMORY ID dvc OBLIGATORY.
+SELECT-OPTIONS s_obj FOR gs_smim-objid.
 
 INCLUDE zmime_editor_w3_c01.
 INCLUDE zmime_editor_w3_f01.
