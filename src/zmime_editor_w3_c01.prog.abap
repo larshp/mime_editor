@@ -136,9 +136,10 @@ CLASS lcl_tree_content IMPLEMENTATION.
           lt_w3params TYPE lcl_smim=>ty_wwwparams_tt.
 
     SELECT obj_name FROM tadir INTO TABLE @lt_tadir
-      WHERE devclass = @p_devc
+      WHERE devclass = @p_devc AND obj_name IN @s_obj
       AND object = 'W3MI' ORDER BY obj_name.            "#EC CI_GENBUFF
     IF sy-subrc <> 0.
+      MESSAGE |No MIME objects found| TYPE 'S'.
       RETURN.
     ENDIF.
 
@@ -174,7 +175,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
         IF sy-subrc <> 0.
           CONTINUE.
-        ELSEIF 'CSS,JS,TEXT,TXT,HTM,HTML,XML' NS lv_ext.
+        ELSEIF 'CSS,JS,JSON,TEXT,TXT,HTM,HTML,XML' NS lv_ext.
           CONTINUE.
         ENDIF.
 
@@ -191,6 +192,10 @@ CLASS lcl_tree_content IMPLEMENTATION.
         objid = ls_smim-objid
         ext   = lv_ext ) TO mt_smim.
     ENDLOOP.
+
+    IF mt_smim IS INITIAL.
+      MESSAGE |No MIME objects found| TYPE 'S'.
+    ENDIF.
 
   ENDMETHOD.
 
