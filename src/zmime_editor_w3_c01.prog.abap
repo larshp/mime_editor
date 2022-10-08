@@ -384,7 +384,7 @@ CLASS lcl_editor DEFINITION FINAL.
 
   PUBLIC SECTION.
     CLASS-METHODS:
-      init IMPORTING iv_source_type TYPE string DEFAULT 'TXT',
+      init IMPORTING iv_source_type TYPE string DEFAULT 'BSP',
       save,
       is_dirty RETURNING VALUE(rv_dirty) TYPE abap_bool,
       switch IMPORTING is_smim TYPE ty_smim,
@@ -405,13 +405,21 @@ CLASS lcl_editor IMPLEMENTATION.
   METHOD init.
     go_editor = NEW #(
       parent           = go_splitter->bottom_right_container
-      max_number_chars = 1000 ).
+      max_number_chars = 1000
+      source_type      = iv_source_type ).
+
+    go_editor->upload_properties( EXCEPTIONS OTHERS = 4 ).
+    IF sy-subrc <> 0.
+      MESSAGE a215(ed).
+    ENDIF.
 
     go_editor->set_enable( abap_false ).
-    go_editor->set_readonly_mode( cl_gui_sourceedit=>true ).
-    go_editor->set_source_type( iv_source_type ).
+    go_editor->set_readonly_mode( cl_gui_abapedit=>true ).
+    go_editor->set_actual_name( p_name = 'BSP' ).
     go_editor->create_document( ).
-    go_editor->set_toolbar_mode( cl_gui_sourceedit=>true ).
+    go_editor->set_toolbar_mode( cl_gui_abapedit=>true ).
+    go_editor->set_tabbar_mode( tabbar_mode = cl_gui_abapedit=>false ).
+    go_editor->set_statusbar_mode( statusbar_mode = cl_gui_abapedit=>true ).
   ENDMETHOD.
 
   METHOD is_dirty.
@@ -463,11 +471,12 @@ CLASS lcl_editor IMPLEMENTATION.
       WHEN 'XML'.
         init( 'XML' ).
       WHEN OTHERS.
-        init( 'TXT' ).
+        init( 'BSP' ).
     ENDCASE.
 
+    go_editor->set_actual_name( p_name = ms_smim-objid ).
     go_editor->set_enable( abap_true ).
-    go_editor->set_readonly_mode( cl_gui_sourceedit=>false ).
+    go_editor->set_readonly_mode( cl_gui_abapedit=>false ).
     lv_content = lcl_smim=>get_content( ms_smim ).
     go_editor->set_text( string_to_tab( lv_content ) ).
     go_editor->set_focus( go_editor ).
