@@ -96,7 +96,7 @@ CLASS lcl_tree_content IMPLEMENTATION.
 
     go_tree->add_nodes(
       EXPORTING
-        table_structure_name           = 'MTREESNODE'
+        table_structure_name           = 'TREESNODE'
         node_table                     = lt_nodes
       EXCEPTIONS
         failed                         = 1
