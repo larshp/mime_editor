@@ -497,7 +497,7 @@ CLASS lcl_editor IMPLEMENTATION.
     ENDIF.
 
     lv_len = strlen( iv_string ) - strlen( mv_newline ).
-    mv_eof = boolc( iv_string+lv_len = mv_newline ).
+    mv_eof = xsdbool( iv_string+lv_len = mv_newline ).
   ENDMETHOD.
 
   METHOD tab_to_string.
