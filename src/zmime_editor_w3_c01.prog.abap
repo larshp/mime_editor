@@ -396,8 +396,10 @@ CLASS lcl_editor DEFINITION FINAL.
   PRIVATE SECTION.
     CLASS-DATA:
       ms_smim    TYPE ty_smim,
-      mv_eof     TYPE abap_bool, "flag for newline at end-of-file
-      mv_newline TYPE string. "crlf or lf at end-of-line
+      "flag for newline at end-of-file
+      mv_eof     TYPE abap_bool,
+      "crlf or lf at end-of-line
+      mv_newline TYPE string.
 
 ENDCLASS.
 
