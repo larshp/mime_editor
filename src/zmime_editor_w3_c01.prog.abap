@@ -396,6 +396,9 @@ CLASS lcl_editor DEFINITION FINAL.
   PRIVATE SECTION.
     CLASS-DATA:
       ms_smim    TYPE ty_smim,
+      "flag for newline at end-of-file
+      mv_eof     TYPE abap_bool,
+      "crlf or lf at end-of-line
       mv_newline TYPE string.
 
 ENDCLASS.
@@ -484,6 +487,8 @@ CLASS lcl_editor IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD string_to_tab.
+    DATA lv_len TYPE i.
+
     FIND cl_abap_char_utilities=>cr_lf IN iv_string.
     IF sy-subrc = 0.
       SPLIT iv_string AT cl_abap_char_utilities=>cr_lf INTO TABLE rt_string.
@@ -492,12 +497,18 @@ CLASS lcl_editor IMPLEMENTATION.
       SPLIT iv_string AT cl_abap_char_utilities=>newline INTO TABLE rt_string.
       mv_newline = cl_abap_char_utilities=>newline.
     ENDIF.
+
+    lv_len = strlen( iv_string ) - strlen( mv_newline ).
+    mv_eof = xsdbool( iv_string+lv_len = mv_newline ).
   ENDMETHOD.
 
   METHOD tab_to_string.
     CONCATENATE LINES OF it_string INTO rv_string
       IN CHARACTER MODE
       SEPARATED BY mv_newline.
+    IF mv_eof = abap_true.
+      rv_string = rv_string && mv_newline.
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.
